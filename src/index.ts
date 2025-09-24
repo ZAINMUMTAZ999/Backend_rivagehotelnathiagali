@@ -1,4 +1,4 @@
-import express from "express";
+import express ,{Response} from "express";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -39,7 +39,10 @@ app.use("/v1", registerRouter);
 app.use("/v2", loginRouter);
 app.use("/v3", addHeroImageRouter);
 
-app.get("/", (_req, res) => {
+app.get("/", (_req, res:Response) => {
+  res.send("successfully on Railway!");
+});
+app.get("/", (_req, res:Response) => {
   res.send("✅ Backend running successfully on Railway!");
 });
 const PORT = Number(process.env.PORT) || 8000;  // This is always a number
