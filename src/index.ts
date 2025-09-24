@@ -47,3 +47,9 @@ const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+  // "scripts": {
+  //   "dev": "nodemon",
+  //   "build": "npm install && npx tsc",
+  //   "start": "node ./dist/index.js",
+  //   "e2e": "cross-env DOTENV_CONFIG_PATH=.env.e2e nodemon"
+  // },
