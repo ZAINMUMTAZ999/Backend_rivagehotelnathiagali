@@ -38,6 +38,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/v1", registerRouter);
 app.use("/v2", loginRouter);
 app.use("/v3", addHeroImageRouter);
+app.get("/", (req, res) => {
+  res.send("✅ Backend running successfully on Railway!");
+});
+
 
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
