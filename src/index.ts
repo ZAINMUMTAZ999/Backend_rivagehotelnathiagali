@@ -10,7 +10,6 @@ import { addHeroImageRouter } from "./routes/addHeroImageRouter";
 
 const MONGODB_URL = process.env.MONGODB_URL as string;
 
-
 const app = express();
 app.use(express.json());
 
@@ -20,10 +19,10 @@ mongoose
   .catch((error) => {
     console.error("Database connection error:", error);
   });
+
 app.use(
   cors({
     origin: "https://rivagehotelnathiagali.vercel.app",
-
     credentials: true,
   })
 );
@@ -39,11 +38,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/v1", registerRouter);
 app.use("/v2", loginRouter);
 app.use("/v3", addHeroImageRouter);
+
 app.get("/", (_req, res) => {
   res.send("✅ Backend running successfully on Railway!");
 });
+const PORT = Number(process.env.PORT) || 8000;  // This is always a number
 
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+// CRITICAL FIX: Bind to 0.0.0.0, not localhost
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
