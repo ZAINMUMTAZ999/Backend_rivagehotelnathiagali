@@ -4,10 +4,14 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoose from "mongoose";
-import {  registerRouter } from "../src/routes/registerRouter";
-import { loginRouter } from "../src/routes/loginRouter";
-import {v2 as cloudinary} from "cloudinary";
-import { addHeroImageRouter } from "./routes/addHeroImageRouter";
+// import {  registerRouter } from "../src/routes/registerRouter";
+// import { loginRouter } from "../src/routes/loginRouter";
+// import {v2 as cloudinary} from "cloudinary";
+// import { addHeroImageRouter } from "./routes/addHeroImageRouter";
+import { registerRouter } from "./routes/registerRouter";  // ✅ Fixed
+import { loginRouter } from "./routes/loginRouter";        // ✅ Fixed
+import { v2 as cloudinary } from "cloudinary";
+import { addHeroImageRouter } from "./routes/addHeroImageRouter"; 
 import serverless from "serverless-http";
 const MONGODB_URL="mongodb+srv://mzainmumtaz99_db_user:dyt5kZSNRjq2x9Yl@cluster0.245yfua.mongodb.net/"
 // dyt5kZSNRjq2x9Yl
