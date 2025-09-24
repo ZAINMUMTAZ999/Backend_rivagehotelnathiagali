@@ -70,10 +70,11 @@ app.use("/v3", addHeroImageRouter);
 // app.use("/.netlify/functions/api", router);
 
 
-app.listen(8000, ()=>{
-  // if (err) console.log("Error in server setup")
-  console.log("Server listening on Port 8000");
-})
+const PORT = process.env.PORT || 8000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 // Export the serverless handler
 // const handler = serverless(app);
 // console.log("handler",handler);
