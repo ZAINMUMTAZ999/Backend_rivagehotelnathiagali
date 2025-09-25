@@ -9,7 +9,7 @@ import cloudinary from "cloudinary";
 // import { AddJobTypes } from "../models/addJob.models";
 import multer from "multer";
 import { AddBlog, addBlogTypes } from "../models/addBlog.models";
-import { ContactUs, contactUsTypes } from "../models/contactUs.models";
+// import { ContactUs, contactUsTypes } from "../models/contactUs.models";
 import { authRoles } from "../middlewares/authRoles";
 // import { Admin } from "mongodb";
 import { AddReview, addReviewTypes } from "../models/addReview.models";
@@ -141,21 +141,21 @@ loginRouter.get(
 //         resp.status(500).json("Something Went Wrong");
 //     }
 // });
-loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
-  try {
-    const body: contactUsTypes = req.body;
+// loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
+//   try {
+//     const body: contactUsTypes = req.body;
 
-    // Ensure req.userId is available via middleware
-    // body.userId = req.userId;
+//     // Ensure req.userId is available via middleware
+//     // body.userId = req.userId;
 
-    const info = await ContactUs.create(body);
+//     const info = await ContactUs.create(body);
 
-    resp.status(200).send(info);
-  } catch (error) {
-    console.error(error);
-    resp.status(500).json("Something Went Wrong");
-  }
-});
+//     resp.status(200).send(info);
+//   } catch (error) {
+//     console.error(error);
+//     resp.status(500).json("Something Went Wrong");
+//   }
+// });
 // loginRouter.get("/contactUs", async (req: Request, resp: Response) => {
 //   // const body:addBlogTypes=req.body;
 //   try {
@@ -572,14 +572,14 @@ loginRouter.get("/search", async (req: Request, resp: Response) => {
 });
 
 
-export type contactUsResponse = {
-  data: contactUsTypes[];
-  pagination: {
-    total: number;
-    page: number;
-    pages: number;
-  };
-};
+// export type contactUsResponse = {
+//   data: contactUsTypes[];
+//   pagination: {
+//     total: number;
+//     page: number;
+//     pages: number;
+//   };
+// };
 // add review
 loginRouter.post("/addReview", async (req: Request, resp: Response) => {
   try {
@@ -632,73 +632,78 @@ loginRouter.get("/allReview", async (req: Request, resp: Response) => {
   }
 });
 
-loginRouter.get(
-  "/contactUs",
-  verifyToken,
-  authRoles("admin"),
+// loginRouter.get(
+//   "/contactUs",
+//   verifyToken,
+//   authRoles("admin"),
 
-  async (req: Request, resp: Response) => {
-    try {
-      // Construct the query
-      const query = constructSearchQuery(req.query);
-      // let sortOptions = {};
-      // switch (req.query.sortOption) {
-      //   // case "starRating":
-    //   //   sortOptions = { starRating: -1 }; //high to low  strRtainpg
-      //   //   break;
-      //   case "pricePerNightAsc":
-      //     sortOptions = { pricePerNight: 1 }; // from low to high
-      //     break;
-      //   case "pricePerNightDesc":
-      //     sortOptions = { pricePerNight: -1 };
-      //     break;
-      //   case "salary_Asc":
-      //     sortOptions = { salary: 1 };
-      //     break;
+//   async (req: Request, resp: Response) => {
+//     try {
+//       // Construct the query
+//       const query = constructSearchQuery(req.query);
+//       // let sortOptions = {};
+//       // switch (req.query.sortOption) {
+//       //   // case "starRating":
+//     //   //   sortOptions = { starRating: -1 }; //high to low  strRtainpg
+//       //   //   break;
+//       //   case "pricePerNightAsc":
+//       //     sortOptions = { pricePerNight: 1 }; // from low to high
+//       //     break;
+//       //   case "pricePerNightDesc":
+//       //     sortOptions = { pricePerNight: -1 };
+//       //     break;
+//       //   case "salary_Asc":
+//       //     sortOptions = { salary: 1 };
+//       //     break;
 
-      //   case "salary_Desc":
-      //     sortOptions = { salary: -1 }; // High to low
-      //     break;
-      // }
-      // Pagination setup
-      const pageSize = 4; // Number of items per page
-      const pageNumber = parseInt(
-        req.query.page ? req.query.page.toString() : "1"
-      ); // Current page
-      const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
+//       //   case "salary_Desc":
+//       //     sortOptions = { salary: -1 }; // High to low
+//       //     break;
+//       // }
+//       // Pagination setup
+//       const pageSize = 4; // Number of items per page
+//       const pageNumber = parseInt(
+//         req.query.page ? req.query.page.toString() : "1"
+//       ); // Current page
+//       const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
 
-      // Fetch matching jobs
-      const searchContact = await ContactUs.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize);
+//       // Fetch matching jobs
+//       const searchContact = await ContactUs.find(query)
+//         .sort({ createdAt: -1 })
+//         .skip(skip)
+//         .limit(pageSize);
 
-      // Total matching jobs count
-      const total = await ContactUs.countDocuments(query);
+//       // Total matching jobs count
+//       const total = await ContactUs.countDocuments(query);
 
-      // Build response
-      const response: contactUsResponse = {
-        data: searchContact,
-        pagination: {
-          total,
-          page: pageNumber,
-          pages: Math.ceil(total / pageSize),
-        },
-      };
+//       // Build response
+//       const response: contactUsResponse = {
+//         data: searchContact,
+//         pagination: {
+//           total,
+//           page: pageNumber,
+//           pages: Math.ceil(total / pageSize),
+//         },
+//       };
 
-      resp.status(200).json(response);
-    } catch (error) {
-      console.error("Error in search route:", error);
-      resp.status(500).json({ message: "Internal Server Error" });
-    }
-  }
-);
+//       resp.status(200).json(response);
+//     } catch (error) {
+//       console.error("Error in search route:", error);
+//       resp.status(500).json({ message: "Internal Server Error" });
+//     }
+//   }
+// );
 
 const constructSearchQuery = (queryParams: any) => {
   let constructedQuery: any = {};
 
-  if (queryParams.title) {
-    constructedQuery.title = new RegExp(queryParams.title, "i"); // Case-insensitive partial match
+  if (queryParams.phoneNumber) {
+    constructedQuery.phoneNumber = new RegExp(queryParams.phoneNumber, "i"); // Case-insensitive partial match
+    
+  }
+  if (queryParams.name) {
+    constructedQuery.name = new RegExp(queryParams.name, "i"); // Case-insensitive partial match
+    
   }
 
   return constructedQuery;

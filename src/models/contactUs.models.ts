@@ -5,7 +5,7 @@ _id:string;
 name: string;
 email: string;
 phoneNumber: number;
-interestedIn: string;
+
 message: string;
 
 };
@@ -24,10 +24,6 @@ const contactUsSchema = new mongoose.Schema<contactUsTypes>(
     },
     phoneNumber: {
       type: Number,
-      required: true,
-    },
-    interestedIn: {
-      type: String,
       required: true,
     },
     message: {
