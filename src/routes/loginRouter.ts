@@ -693,7 +693,21 @@ loginRouter.get(
     }
   }
 );
+// getting id per hotel
+loginRouter.get("/rooms/:id",async(req:Request,resp:Response)=>{
+  const id = req.params.id.toString();
+  try {
+        const hotel = await AddHotel.findById({
+      _id: id
+      // userId: req.userId,
+    });
+    resp.json(hotel);
 
+  } catch (error) {
+     console.error("Error in search route:", error);
+      resp.status(500).json({ message: "Internal Server Error" });
+  }
+});
 const constructSearchQuery = (queryParams: any) => {
   let constructedQuery: any = {};
 
