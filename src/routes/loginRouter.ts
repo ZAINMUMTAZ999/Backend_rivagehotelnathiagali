@@ -8,13 +8,16 @@ import cloudinary from "cloudinary";
 
 // import { AddJobTypes } from "../models/addJob.models";
 import multer from "multer";
-import { AddBlog, addBlogTypes } from "../models/addBlog.models";
+// import { AddBlog, addBlogTypes } from "../models/addBlog.models";
 import { ContactUs, contactUsTypes } from "../models/contactUs.models";
 import { authRoles } from "../middlewares/authRoles";
 // import { Admin } from "mongodb";
 import { AddReview, addReviewTypes } from "../models/addReview.models";
 import { AddHotel, addHotelTypes } from "../models/addHotel.models";
 import { AddHeroImage } from "../models/addHeroImage";
+import  { Review } from "../models/addReviewHoteLId";
+// import { addReviewHoteLId } from "../models/addReviewHoteLId";
+
 // import { AddHeroImage } from "../models/addHeroImage";
 
 // export type jobSearchResponse = {
@@ -121,7 +124,21 @@ loginRouter.get(
     resp.status(200).json({message:"hey dataaa"  });
   }
 );
+// getting id per hotel
+loginRouter.get("/rooms/:id",async(req:Request,resp:Response)=>{
+  const id = req.params.id.toString();
+  try {
+        const hotel = await AddHotel.findById({
+      _id: id
+      // userId: req.userId,
+    });
+    resp.json(hotel);
 
+  } catch (error) {
+     console.error("Error in search route:", error);
+      resp.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 // ContactUs  ////
 // loginRouter.post("/contactUs",async(req:Request,resp:Response)=>{
@@ -471,14 +488,7 @@ loginRouter.get("/allReview", async (_req: Request, resp: Response) => {
   }
 });
 
-export type blogSearchResponse = {
-  data: addBlogTypes[];
-  pagination: {
-    total: number;
-    page: number;
-    pages: number;
-  };
-};
+;
 loginRouter.post(
   "/addRoom",
   verifyToken,  upload.array("imageFiles", 6),
@@ -523,53 +533,7 @@ loginRouter.post(
   }
 );
 
-// Update search route
-loginRouter.get("/search", async (req: Request, resp: Response) => {
-  try {
-    const query = constructSearchQuery(req.query);
-    const pageSize = 8;
-    const pageNumber = parseInt(
-      req.query.page ? req.query.page.toString() : "1"
-    );
-    const skip = (pageNumber - 1) * pageSize;
 
-    const searchJob = await AddBlog.find(query)
-      .sort({ date: -1, createdAt: -1 }) // Use both date fields for sorting
-      .skip(skip)
-      .limit(pageSize);
-
-    const total = await AddBlog.countDocuments(query);
-
-    const formattedBlogs = searchJob.map((blog) => ({
-      ...blog.toObject(),
-      formattedDate: (blog.date || blog.createdAt)?.toLocaleDateString(
-        "en-US",
-        {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      ),
-      displayDate: blog.date || blog.createdAt,
-    }));
-
-    const response: blogSearchResponse = {
-      data: formattedBlogs,
-      pagination: {
-        total,
-        page: pageNumber,
-        pages: Math.ceil(total / pageSize),
-      },
-    };
-
-    resp.status(200).json(response);
-  } catch (error) {
-    console.error("Error in search route:", error);
-    resp.status(500).json({ message: "Internal Server Error" });
-  }
-});
 
 
 export type contactUsResponse = {
@@ -631,83 +595,61 @@ loginRouter.get("/allReview", async (req: Request, resp: Response) => {
     resp.status(500).json({ message: "Internal Server Error" });
   }
 });
-
-loginRouter.get(
-  "/contactUs",
-  verifyToken,
-  authRoles("admin"),
-
-  async (req: Request, resp: Response) => {
-    try {
-      // Construct the query
-      const query = constructSearchQuery(req.query);
-      // let sortOptions = {};
-      // switch (req.query.sortOption) {
-      //   // case "starRating":
-    //   //   sortOptions = { starRating: -1 }; //high to low  strRtainpg
-      //   //   break;
-      //   case "pricePerNightAsc":
-      //     sortOptions = { pricePerNight: 1 }; // from low to high
-      //     break;
-      //   case "pricePerNightDesc":
-      //     sortOptions = { pricePerNight: -1 };
-      //     break;
-      //   case "salary_Asc":
-      //     sortOptions = { salary: 1 };
-      //     break;
-
-      //   case "salary_Desc":
-      //     sortOptions = { salary: -1 }; // High to low
-      //     break;
-      // }
-      // Pagination setup
-      const pageSize = 4; // Number of items per page
-      const pageNumber = parseInt(
-        req.query.page ? req.query.page.toString() : "1"
-      ); // Current page
-      const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
-
-      // Fetch matching jobs
-      const searchContact = await ContactUs.find(query)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(pageSize);
-
-      // Total matching jobs count
-      const total = await ContactUs.countDocuments(query);
-
-      // Build response
-      const response: contactUsResponse = {
-        data: searchContact,
-        pagination: {
-          total,
-          page: pageNumber,
-          pages: Math.ceil(total / pageSize),
-        },
-      };
-
-      resp.status(200).json(response);
-    } catch (error) {
-      console.error("Error in search route:", error);
-      resp.status(500).json({ message: "Internal Server Error" });
-    }
-  }
-);
-// getting id per hotel
-loginRouter.get("/rooms/:id",async(req:Request,resp:Response)=>{
-  const id = req.params.id.toString();
+loginRouter.post("/rooms/:id/reviews", async (req:Request, res:Response) => {
   try {
-        const hotel = await AddHotel.findById({
-      _id: id
-      // userId: req.userId,
-    });
-    resp.json(hotel);
+    const { name, message } = req.body;
 
-  } catch (error) {
-     console.error("Error in search route:", error);
-      resp.status(500).json({ message: "Internal Server Error" });
+    const review = await Review.create({
+      hotelId: req.params.id,
+      name,
+      message,
+    });
+
+    await review.save()
+    res.status(201).json(review);
+  } catch (err) {
+    res.status(400).json({message:"Internal error"});
   }
 });
+
+// loginRouter.get("/rooms/:roomId/reviews", async (req:Request, res:Response) => {
+//   try {
+//     const { name, message } = req.body;
+
+//     const hotel = await AddHotel.findById(req.params.roomId);
+//     if (!hotel) {
+//        res.status(404).json({ error: "Room not found" });
+//        return;
+//       }
+
+//     const review = await addReviewHoteLId.create({
+//       room: hotel._id,
+//       name,
+//       message,
+//     });
+
+//     res.status(201).json(review);
+//   } catch (err) {
+//     res.status(500).json({ error: (err as Error).message });
+//   }
+// });
+
+
+
+
+// GET /rooms/:id/reviews
+loginRouter.get("/rooms/:id/reviews", async (req: Request, res: Response) => {
+  try {
+    const reviews = await Review.find({
+      hotelId: req.params.id        // match the hotel ObjectId
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json(reviews);
+  } catch (err) {
+    res.status(500).json({ message: "error" });
+  }
+});
+
 const constructSearchQuery = (queryParams: any) => {
   let constructedQuery: any = {};
 

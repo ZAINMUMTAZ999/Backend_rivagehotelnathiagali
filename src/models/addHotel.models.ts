@@ -1,4 +1,14 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
+// const reviewIDSchema = new mongoose.Schema({
+//      name: {
+//       type: String,
+//       required: true,
+//     },
+//     message: {
+//       type: String,
+//       required: true,
+//     },  createdAt: { type: Date, default: Date.now },
+// })
 export type addHotelTypes = {
   _id: string;
   userId: string;
@@ -15,6 +25,12 @@ export type addHotelTypes = {
   imageUrls: string[];
 imageFiles: FileList;
 roomStatus:string,
+  // reviews: {          // <-- add this
+  //   name: string;
+  //   message: string;
+  //   createdAt: Date;
+  // }[];
+  // reviews: Types.ObjectId[]; 
   lastUpdated: Date;
 
 };
@@ -36,6 +52,7 @@ default:"Available"},
   pricePerNight: { type: Number,  },
   // starRating: { type: Number,  min: 1, max: 5 },
   imageUrls: [{ type: String,  }],
+  //  reviews: [reviewIDSchema],
   lastUpdated: { type: Date  },
   },
   { timestamps: true }

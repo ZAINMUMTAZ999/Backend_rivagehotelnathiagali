@@ -22,8 +22,8 @@ mongoose
 
 app.use(
   cors({
-    origin: "https://rivagehotelnathiagali.vercel.app",
-    // origin: "http://localhost:3000",
+    // origin: "https://rivagehotelnathiagali.vercel.app",
+    origin: "http://localhost:3000",
 
     credentials: true,
   })
