@@ -608,32 +608,9 @@ loginRouter.post("/rooms/:id/reviews", async (req:Request, res:Response) => {
     await review.save()
     res.status(201).json(review);
   } catch (err) {
-    res.status(400).json({message:"Internal error"});
+    res.status(400).json({message:"Internal errorss"});
   }
 });
-
-// loginRouter.get("/rooms/:roomId/reviews", async (req:Request, res:Response) => {
-//   try {
-//     const { name, message } = req.body;
-
-//     const hotel = await AddHotel.findById(req.params.roomId);
-//     if (!hotel) {
-//        res.status(404).json({ error: "Room not found" });
-//        return;
-//       }
-
-//     const review = await addReviewHoteLId.create({
-//       room: hotel._id,
-//       name,
-//       message,
-//     });
-
-//     res.status(201).json(review);
-//   } catch (err) {
-//     res.status(500).json({ error: (err as Error).message });
-//   }
-// });
-
 
 
 
