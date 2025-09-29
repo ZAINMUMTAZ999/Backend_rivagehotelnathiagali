@@ -15,7 +15,7 @@ import { authRoles } from "../middlewares/authRoles";
 import { AddReview, addReviewTypes } from "../models/addReview.models";
 import { AddHotel, addHotelTypes } from "../models/addHotel.models";
 import { AddHeroImage } from "../models/addHeroImage";
-import  { Review } from "../models/addReviewHoteLId";
+import { Review } from "../models/addReviewHoteLId";
 // import { addReviewHoteLId } from "../models/addReviewHoteLId";
 
 // import { AddHeroImage } from "../models/addHeroImage";
@@ -108,7 +108,7 @@ loginRouter.get(
   "/validate-token",
   verifyToken,
   async (req: Request, resp: Response) => {
-    if (!req.user ) {
+    if (!req.user) {
       // Optional: Add a check for robustness
       resp.status(401).send({ message: "User role not found in token" });
       return;
@@ -120,23 +120,21 @@ loginRouter.get(
   "/dataa",
 
   async (_req: Request, resp: Response) => {
- 
-    resp.status(200).json({message:"hey dataaa"  });
+    resp.status(200).json({ message: "hey dataaa" });
   }
 );
 // getting id per hotel
-loginRouter.get("/rooms/:id",async(req:Request,resp:Response)=>{
+loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
   const id = req.params.id.toString();
   try {
-        const hotel = await AddHotel.findById({
-      _id: id
+    const hotel = await AddHotel.findById({
+      _id: id,
       // userId: req.userId,
     });
     resp.json(hotel);
-
   } catch (error) {
-     console.error("Error in search route:", error);
-      resp.status(500).json({ message: "Internal Server Error" });
+    console.error("Error in search route:", error);
+    resp.status(500).json({ message: "Internal Server Error" });
   }
 });
 
@@ -192,7 +190,6 @@ loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
 //     resp.status(500).json("Something Went Wrong");
 //   }
 // });
-
 
 // LOGOUT ////
 
@@ -278,30 +275,20 @@ loginRouter.get(
 //     }
 //   }
 // );
-loginRouter.get("/rooms",async(req:Request,resp:Response)=>{
+loginRouter.get("/rooms", async (req: Request, resp: Response) => {
   try {
-      
     // Construct the query
     const query = constructSearchQuery(req.query);
-    // let sortOptions = {};
-    // switch (req.query.sortOption) {
-    //   // case "starRating":
-    //   //   sortOptions = { starRating: -1 }; //high to low  strRtaing
-    //   //   break;
-    //   case "pricePerNightAsc":
-    //     sortOptions = { pricePerNight: 1 }; // from low to high
-    //     break;
-    //   case "pricePerNightDesc":
-    //     sortOptions = { pricePerNight: -1 };
-    //     break;
-    //   case "salary_Asc":
-    //     sortOptions = { salary: 1 };
-    //     break;
+    let sortOptions = {};
+    switch (req.query.sortOption) {
+  case "priceAsc":
+    sortOptions = { pricePerNight: 1 };
+    break;
+  case "priceDesc":
+    sortOptions = { pricePerNight: -1 };
+    break;
+}
 
-    //   case "salary_Desc":
-    //     sortOptions = { salary: -1 }; // High to low
-    //     break;
-    // }
     // Pagination setup
     const pageSize = 5; // Number of items per page
     const pageNumber = parseInt(
@@ -310,22 +297,23 @@ loginRouter.get("/rooms",async(req:Request,resp:Response)=>{
     const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
 
     // Fetch matching jobs
-    const searchJob = await AddHotel.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(pageSize);
+  const searchJob = await AddHotel.find(query)
+  .sort({ ...sortOptions, createdAt: -1 })  // newest first if prices equal
+  .skip(skip)
+  .limit(pageSize);
+
 
     // Total matching jobs count
     const total = await AddHotel.countDocuments(query);
 
     // Build response
     type hotelSearchResponse = {
-      data:addHotelTypes[];
-    pagination:{
-      total:number,
-      page:number,
-      pages:number,
-    }
+      data: addHotelTypes[];
+      pagination: {
+        total: number;
+        page: number;
+        pages: number;
+      };
     };
 
     const response: hotelSearchResponse = {
@@ -337,7 +325,7 @@ loginRouter.get("/rooms",async(req:Request,resp:Response)=>{
       },
     };
 
-  resp.status(200).json(response);
+    resp.status(200).json(response);
 
     // const hotels=await AddHotel.find();
     // if(!hotels){
@@ -346,9 +334,8 @@ loginRouter.get("/rooms",async(req:Request,resp:Response)=>{
     // }
     // resp.status(200).json({hotels});
   } catch (error) {
-     console.error("Error in search route:", error);
-      resp.status(500).json({ message: "Internal Server Error" });
-    
+    console.error("Error in search route:", error);
+    resp.status(500).json({ message: "Internal Server Error" });
   }
 });
 export async function uploadImageHero(
@@ -388,13 +375,12 @@ loginRouter.put(
       // const updates: { imageFile?: string } = {};
       // if (imageFile) updates.imageFile = imageFile;
       // if (lastName) updates.imageFile = imageFile;
-const updatedImageUrl = AddHeroImage;
-     const updatedUser = await AddHeroImage.findOneAndUpdate(
-  { userId },
-  { $set: { imageFile: updatedImageUrl } }, 
-  { new: true, upsert: true }
-);
-
+      const updatedImageUrl = AddHeroImage;
+      const updatedUser = await AddHeroImage.findOneAndUpdate(
+        { userId },
+        { $set: { imageFile: updatedImageUrl } },
+        { new: true, upsert: true }
+      );
 
       if (!updatedUser) {
         res.status(404).json({ message: "User not found" });
@@ -415,27 +401,22 @@ const updatedImageUrl = AddHeroImage;
     }
   }
 );
-loginRouter.get(
-  "/homeImage",
-  async (req: Request, resp: Response) => {
-    try {
-    
-      // match by custom userId field
-      const homeImage = await AddHeroImage.findOne().select("imageFile");
+loginRouter.get("/homeImage", async (req: Request, resp: Response) => {
+  try {
+    // match by custom userId field
+    const homeImage = await AddHeroImage.findOne().select("imageFile");
 
-      if (!homeImage) {
-        resp.status(404).json({ message: "Image not found for this user" });
-        return;
-      }
-
-      resp.status(200).send(homeImage);
-    } catch (error) {
-      console.error("Error fetching user data:", error);
-      resp.status(500).json({ message: "Internal Server Error" });
+    if (!homeImage) {
+      resp.status(404).json({ message: "Image not found for this user" });
+      return;
     }
-  }
-);
 
+    resp.status(200).send(homeImage);
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    resp.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 loginRouter.post("/addReview", async (req: Request, resp: Response) => {
   try {
@@ -488,10 +469,10 @@ loginRouter.get("/allReview", async (_req: Request, resp: Response) => {
   }
 });
 
-;
 loginRouter.post(
   "/addRoom",
-  verifyToken,  upload.array("imageFiles", 6),
+  verifyToken,
+  upload.array("imageFiles", 6),
   // [
   //   body("name").notEmpty().withMessage("Name is required"),
   //   body("city").notEmpty().withMessage("City is required"),
@@ -507,16 +488,13 @@ loginRouter.post(
   //     .isArray()
   //     .withMessage("Facilities are required"),
   // ],
- 
+
   async (req: Request, res: Response) => {
     try {
-    
-
-         const imageFiles = req.files as Express.Multer.File[];
+      const imageFiles = req.files as Express.Multer.File[];
       const newHotel: addHotelTypes = req.body;
 
       const imageUrls = await uploadImages(imageFiles);
-
 
       newHotel.imageUrls = imageUrls;
       newHotel.lastUpdated = new Date();
@@ -532,9 +510,6 @@ loginRouter.post(
     }
   }
 );
-
-
-
 
 export type contactUsResponse = {
   data: contactUsTypes[];
@@ -595,7 +570,7 @@ loginRouter.get("/allReview", async (req: Request, resp: Response) => {
     resp.status(500).json({ message: "Internal Server Error" });
   }
 });
-loginRouter.post("/rooms/:id/reviews", async (req:Request, res:Response) => {
+loginRouter.post("/rooms/:id/reviews", async (req: Request, res: Response) => {
   try {
     const { name, message } = req.body;
 
@@ -605,20 +580,18 @@ loginRouter.post("/rooms/:id/reviews", async (req:Request, res:Response) => {
       message,
     });
 
-    await review.save()
+    await review.save();
     res.status(201).json(review);
   } catch (err) {
-    res.status(400).json({message:"Internal errorss"});
+    res.status(400).json({ message: "Internal errorss" });
   }
 });
-
-
 
 // GET /rooms/:id/reviews
 loginRouter.get("/rooms/:id/reviews", async (req: Request, res: Response) => {
   try {
     const reviews = await Review.find({
-      hotelId: req.params.id        // match the hotel ObjectId
+      hotelId: req.params.id, // match the hotel ObjectId
     }).sort({ createdAt: -1 });
 
     res.status(200).json(reviews);
@@ -632,11 +605,25 @@ const constructSearchQuery = (queryParams: any) => {
 
   if (queryParams.phoneNumber) {
     constructedQuery.phoneNumber = new RegExp(queryParams.phoneNumber, "i"); // Case-insensitive partial match
-    
   }
-  if (queryParams.name) {
-    constructedQuery.name = new RegExp(queryParams.name, "i"); // Case-insensitive partial match
-    
+if (queryParams.name) {
+  constructedQuery.name = { $regex: queryParams.name, $options: "i" };
+}
+if (queryParams.maxPrice) {
+  constructedQuery.maxPrice = {
+    $lte: parseInt(queryParams.maxPrice).toString(),
+  };
+
+ if (queryParams.city) {
+    constructedQuery.city = { $regex: queryParams.city, $options: "i" };
+  };
+  // if (queryParams.name) {
+  //   constructedQuery.name = new RegExp(queryParams.name, "i"); // Case-insensitive partial match
+  // }
+  // if (queryParams.maxPrice) {
+  //   constructedQuery.maxPrice = {
+  //     $lte: parseInt(queryParams.maxPrice).toString(),
+  //   };
   }
 
   return constructedQuery;
