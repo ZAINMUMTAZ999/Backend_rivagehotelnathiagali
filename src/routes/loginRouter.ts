@@ -16,6 +16,7 @@ import { AddReview, addReviewTypes } from "../models/addReview.models";
 import { AddHotel, addHotelTypes } from "../models/addHotel.models";
 import { AddHeroImage } from "../models/addHeroImage";
 import { Review } from "../models/addReviewHoteLId";
+import { AddBooking, AddBookingTypes } from "../models/addBooking.model";
 // import { addReviewHoteLId } from "../models/addReviewHoteLId";
 
 // import { AddHeroImage } from "../models/addHeroImage";
@@ -378,6 +379,7 @@ export async function uploadImageHero(
 loginRouter.put(
   "/UpdateUser",
   verifyToken,
+  authRoles("admin"),
   upload.single("imageFile"),
   async (req: Request, res: Response): Promise<void> => {
     try {
@@ -436,6 +438,26 @@ loginRouter.get("/homeImage", async (req: Request, resp: Response) => {
   }
 });
 
+loginRouter.post("/addbookings",verifyToken,authRoles("admin"), async (req: Request, resp: Response) => {
+  try {
+    const body: AddBookingTypes = {
+      ...req.body,
+    };
+
+    // console.log("addReviewBody", body);
+
+    const addBookinges = await AddBooking.create(body);
+    if (!addBookinges) {
+      resp.status(404).json({ message: "Failed to add the review" });
+      return;
+    }
+
+    resp.status(200).json(addBookinges);
+  } catch (error) {
+    console.error("Error in addBookinges route:", error);
+    resp.status(500).json({ message: "Internal Server Error" });
+  }
+});
 loginRouter.post("/addReview", async (req: Request, resp: Response) => {
   try {
     const body: addReviewTypes = {
