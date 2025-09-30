@@ -156,6 +156,8 @@ loginRouter.get("/contactUs", async (req: Request, resp: Response) => {
   try {
     // Construct the query
     const query = constructSearchQuery(req.query);
+        console.log("👉 Incoming Query Params:", req.query);
+    console.log("👉 Constructed Mongo Query:", JSON.stringify(query, null, 2));
 //     let sortOptions = {};
 //     switch (req.query.sortOption) {
 //   case "priceAsc":
@@ -618,13 +620,17 @@ loginRouter.get("/rooms/:id/reviews", async (req: Request, res: Response) => {
 
 const constructSearchQuery = (queryParams: any) => {
   let constructedQuery: any = {};
-
-  if (queryParams.phoneNumber) {
-    constructedQuery.phoneNumber = new RegExp(queryParams.phoneNumber, "i"); // Case-insensitive partial match
+ if (queryParams.phoneNumber) {
+    constructedQuery.phoneNumber = {
+      $regex: queryParams.phoneNumber.toString(),
+      $options: "i",
+    };
   }
+
 if (queryParams.name) {
   constructedQuery.name = { $regex: queryParams.name, $options: "i" };
 }
+
 if (queryParams.email) {
   constructedQuery.email = { $regex: queryParams.email, $options: "i" };
 }

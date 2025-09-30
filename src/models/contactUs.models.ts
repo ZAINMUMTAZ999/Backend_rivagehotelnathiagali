@@ -4,7 +4,7 @@ userId: string;
 _id:string;
 name: string;
 email: string;
-phoneNumber: number;
+phoneNumber: string;
 
 message: string;
 
@@ -23,7 +23,7 @@ const contactUsSchema = new mongoose.Schema<contactUsTypes>(
       required: true,
     },
     phoneNumber: {
-      type: Number,
+      type: String,
       required: true,
     },
     message: {
