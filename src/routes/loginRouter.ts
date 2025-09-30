@@ -617,41 +617,71 @@ loginRouter.get("/rooms/:id/reviews", async (req: Request, res: Response) => {
     res.status(500).json({ message: "error" });
   }
 });
-
 const constructSearchQuery = (queryParams: any) => {
-  let constructedQuery: any = {};
- if (queryParams.phoneNumber) {
+  const constructedQuery: any = {};
+
+  if (queryParams.phoneNumber) {
     constructedQuery.phoneNumber = {
       $regex: queryParams.phoneNumber.toString(),
       $options: "i",
     };
   }
 
-if (queryParams.name) {
-  constructedQuery.name = { $regex: queryParams.name, $options: "i" };
-}
-
-if (queryParams.email) {
-  constructedQuery.email = { $regex: queryParams.email, $options: "i" };
-}
-if (queryParams.maxPrice) {
-  constructedQuery.maxPrice = {
-    $lte: parseInt(queryParams.maxPrice).toString(),
-  };
-
- if (queryParams.city) {
-    constructedQuery.city = { $regex: queryParams.city, $options: "i" };
-  };
-  // if (queryParams.name) {
-  //   constructedQuery.name = new RegExp(queryParams.name, "i"); // Case-insensitive partial match
-  // }
-  // if (queryParams.maxPrice) {
-  //   constructedQuery.maxPrice = {
-  //     $lte: parseInt(queryParams.maxPrice).toString(),
-  //   };
+  if (queryParams.name) {
+    constructedQuery.name = { $regex: queryParams.name, $options: "i" };
   }
 
-  return constructedQuery;
+  if (queryParams.email) {
+    constructedQuery.email = { $regex: queryParams.email, $options: "i" };
+  }
+
+  if (queryParams.city) {
+    constructedQuery.city = { $regex: queryParams.city, $options: "i" };
+  }
+
+  if (queryParams.maxPrice) {
+    constructedQuery.maxPrice = {
+      $lte: parseInt(queryParams.maxPrice),
+    };
+  }
+
+  return constructedQuery; // ✅ always return
 };
+
+// const constructSearchQuery = (queryParams: any) => {
+//   let constructedQuery: any = {};
+//  if (queryParams.phoneNumber) {
+//     constructedQuery.phoneNumber = {
+//       $regex: queryParams.phoneNumber.toString(),
+//       $options: "i",
+//     };
+//   }
+
+// if (queryParams.name) {
+//   constructedQuery.name = { $regex: queryParams.name, $options: "i" };
+// }
+
+// if (queryParams.email) {
+//   constructedQuery.email = { $regex: queryParams.email, $options: "i" };
+// }
+// if (queryParams.maxPrice) {
+//   constructedQuery.maxPrice = {
+//     $lte: parseInt(queryParams.maxPrice).toString(),
+//   };
+
+//  if (queryParams.city) {
+//     constructedQuery.city = { $regex: queryParams.city, $options: "i" };
+//   };
+//   // if (queryParams.name) {
+//   //   constructedQuery.name = new RegExp(queryParams.name, "i"); // Case-insensitive partial match
+//   // }
+//   // if (queryParams.maxPrice) {
+//   //   constructedQuery.maxPrice = {
+//   //     $lte: parseInt(queryParams.maxPrice).toString(),
+//   //   };
+//   }
+
+//   return constructedQuery;
+// };
 
 export { loginRouter };
