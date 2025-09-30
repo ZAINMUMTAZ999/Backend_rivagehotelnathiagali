@@ -138,30 +138,11 @@ loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
   }
 });
 
-// ContactUs  ////
-// loginRouter.post("/contactUs",async(req:Request,resp:Response)=>{
-//     const body:contactUsTypes=req.body;
-//     try {
 
-//       const info= await ContactUs.create(body);
-//       // body.userId=req.userId
-//       if(!info){
-//         resp.status(401).json("Invalid Credentails");
-//         return;
-//       }
-//       await info.save();
-//       resp.status(200).send(info)
-//     } catch (error) {
-//       console.log(error);
-//         resp.status(500).json("Something Went Wrong");
-//     }
-// });
 loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
   try {
     const body: contactUsTypes = req.body;
 
-    // Ensure req.userId is available via middleware
-    // body.userId = req.userId;
 
     const info = await ContactUs.create(body);
 
@@ -171,25 +152,60 @@ loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
     resp.status(500).json("Something Went Wrong");
   }
 });
-// loginRouter.get("/contactUs", async (req: Request, resp: Response) => {
-//   // const body:addBlogTypes=req.body;
-//   try {
-//     // const imageBody = req.file as Express.Multer.File;
-//     // const imageUploaded =await  uploadImages(imageBody)
-//     // body.imageFile= imageUploaded;
-//     // body.userId=req.userId
-//     const blog = await ContactUs.find();
-//     if (!blog) {
-//       resp.status(401).json("Invalid Credentails");
-//       return;
-//     }
+loginRouter.get("/contactUs", async (req: Request, resp: Response) => {
+  try {
+    // Construct the query
+    const query = constructSearchQuery(req.query);
+//     let sortOptions = {};
+//     switch (req.query.sortOption) {
+//   case "priceAsc":
+//     sortOptions = { pricePerNight: 1 };
+//     break;
+//   case "priceDesc":
+//     sortOptions = { pricePerNight: -1 };
+//     break;
+// }
 
-//     resp.status(200).send(blog);
-//   } catch (error) {
-//     console.log(error);
-//     resp.status(500).json("Something Went Wrong");
-//   }
-// });
+    // Pagination setup
+    const pageSize = 10; // Number of items per page
+    const pageNumber = parseInt(
+      req.query.page ? req.query.page.toString() : "1"
+    ); // Current page
+    const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
+
+    // Fetch matching jobs
+  const searchContact = await ContactUs.find(query)
+  .sort({  createdAt: -1 })  // newest first if prices equal
+  .skip(skip)
+  .limit(pageSize);
+
+    // Total matching jobs count
+    const total = await ContactUs.countDocuments(query);
+
+  
+
+    const response: contactUsResponse = {
+      data: searchContact,
+      pagination: {
+        total,
+        page: pageNumber,
+        pages: Math.ceil(total / pageSize),
+      },
+    };
+
+    resp.status(200).json(response);
+
+    // const hotels=await AddHotel.find();
+    // if(!hotels){
+    //     resp.status(500).json({ message: "Internal Server Error" });
+
+    // }
+    // resp.status(200).json({hotels});
+  } catch (error) {
+    console.error("Error in search route:", error);
+    resp.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 // LOGOUT ////
 
@@ -608,6 +624,9 @@ const constructSearchQuery = (queryParams: any) => {
   }
 if (queryParams.name) {
   constructedQuery.name = { $regex: queryParams.name, $options: "i" };
+}
+if (queryParams.email) {
+  constructedQuery.email = { $regex: queryParams.email, $options: "i" };
 }
 if (queryParams.maxPrice) {
   constructedQuery.maxPrice = {
