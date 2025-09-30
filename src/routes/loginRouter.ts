@@ -139,11 +139,9 @@ loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
   }
 });
 
-
 loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
   try {
     const body: contactUsTypes = req.body;
-
 
     const info = await ContactUs.create(body);
 
@@ -157,17 +155,17 @@ loginRouter.get("/contactUs", async (req: Request, resp: Response) => {
   try {
     // Construct the query
     const query = constructSearchQuery(req.query);
-        console.log("👉 Incoming Query Params:", req.query);
+    console.log("👉 Incoming Query Params:", req.query);
     console.log("👉 Constructed Mongo Query:", JSON.stringify(query, null, 2));
-//     let sortOptions = {};
-//     switch (req.query.sortOption) {
-//   case "priceAsc":
-//     sortOptions = { pricePerNight: 1 };
-//     break;
-//   case "priceDesc":
-//     sortOptions = { pricePerNight: -1 };
-//     break;
-// }
+    //     let sortOptions = {};
+    //     switch (req.query.sortOption) {
+    //   case "priceAsc":
+    //     sortOptions = { pricePerNight: 1 };
+    //     break;
+    //   case "priceDesc":
+    //     sortOptions = { pricePerNight: -1 };
+    //     break;
+    // }
 
     // Pagination setup
     const pageSize = 10; // Number of items per page
@@ -177,15 +175,13 @@ loginRouter.get("/contactUs", async (req: Request, resp: Response) => {
     const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
 
     // Fetch matching jobs
-  const searchContact = await ContactUs.find(query)
-  .sort({  createdAt: -1 })  // newest first if prices equal
-  .skip(skip)
-  .limit(pageSize);
+    const searchContact = await ContactUs.find(query)
+      .sort({ createdAt: -1 }) // newest first if prices equal
+      .skip(skip)
+      .limit(pageSize);
 
     // Total matching jobs count
     const total = await ContactUs.countDocuments(query);
-
-  
 
     const response: contactUsResponse = {
       data: searchContact,
@@ -300,13 +296,13 @@ loginRouter.get("/rooms", async (req: Request, resp: Response) => {
     const query = constructSearchQuery(req.query);
     let sortOptions = {};
     switch (req.query.sortOption) {
-  case "priceAsc":
-    sortOptions = { pricePerNight: 1 };
-    break;
-  case "priceDesc":
-    sortOptions = { pricePerNight: -1 };
-    break;
-}
+      case "priceAsc":
+        sortOptions = { pricePerNight: 1 };
+        break;
+      case "priceDesc":
+        sortOptions = { pricePerNight: -1 };
+        break;
+    }
 
     // Pagination setup
     const pageSize = 5; // Number of items per page
@@ -316,11 +312,10 @@ loginRouter.get("/rooms", async (req: Request, resp: Response) => {
     const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
 
     // Fetch matching jobs
-  const searchJob = await AddHotel.find(query)
-  .sort({ ...sortOptions, createdAt: -1 })  // newest first if prices equal
-  .skip(skip)
-  .limit(pageSize);
-
+    const searchJob = await AddHotel.find(query)
+      .sort({ ...sortOptions, createdAt: -1 }) // newest first if prices equal
+      .skip(skip)
+      .limit(pageSize);
 
     // Total matching jobs count
     const total = await AddHotel.countDocuments(query);
@@ -438,26 +433,90 @@ loginRouter.get("/homeImage", async (req: Request, resp: Response) => {
   }
 });
 
-loginRouter.post("/addbookings",verifyToken,authRoles("admin"), async (req: Request, resp: Response) => {
-  try {
-    const body: AddBookingTypes = {
-      ...req.body,
+loginRouter.post(
+  "/addbookings",
+  verifyToken,
+  authRoles("admin"),
+  async (req: Request, resp: Response) => {
+    try {
+      const body: AddBookingTypes = {
+        ...req.body,
+      };
+
+      // console.log("addReviewBody", body);
+
+      const addBookinges = await AddBooking.create(body);
+      if (!addBookinges) {
+        resp.status(404).json({ message: "Failed to add the review" });
+        return;
+      }
+
+      resp.status(200).json(addBookinges);
+    } catch (error) {
+      console.error("Error in addBookinges route:", error);
+      resp.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
+loginRouter.get(
+  "/allbooking",
+  verifyToken,
+  authRoles("admin"),
+  async (req: Request, resp: Response) => {
+    try {
+      const query = constructSearchQuery(req.query);
+      // Pagination setup
+      const pageSize = 4; // Number of items per page
+      const pageNumber = parseInt(
+        req.query.page ? req.query.page.toString() : "1"
+      ); // Current page
+      const skip = (pageNumber - 1) * pageSize; // Skip items for pagination
+      //    const searchJob = await AddHotel.find(query)
+      // .sort({ ...sortOptions, createdAt: -1 })  // newest first if prices equal
+      // .skip(skip)
+      // .limit(pageSize);
+
+      // Total matching jobs count
+      // const total = await AddHotel.countDocuments(query);
+
+      const booking = await AddBooking.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(pageSize);
+      // console.log("reviewUserId",Review);
+      const total = await AddBooking.countDocuments(query);
+      if (!booking) {
+        resp.status(404).json({ message: "Failed to add the review" });
+        return;
+      }
+         // Build response
+    type bookingSearchResponse = {
+      data: AddBookingTypes[];
+      pagination: {
+        total: number;
+        page: number;
+        pages: number;
+      };
     };
 
-    // console.log("addReviewBody", body);
+    const response: bookingSearchResponse = {
+      data: booking,
+      pagination: {
+        total,
+        page: pageNumber,
+        pages: Math.ceil(total / pageSize),
+      },
+    };
 
-    const addBookinges = await AddBooking.create(body);
-    if (!addBookinges) {
-      resp.status(404).json({ message: "Failed to add the review" });
-      return;
+    resp.status(200).json(response);
+
+    } catch (error) {
+      console.error("Error in Bookings route:", error);
+      resp.status(500).json({ message: "Internal Server Error" });
     }
-
-    resp.status(200).json(addBookinges);
-  } catch (error) {
-    console.error("Error in addBookinges route:", error);
-    resp.status(500).json({ message: "Internal Server Error" });
   }
-});
+);
+
 loginRouter.post("/addReview", async (req: Request, resp: Response) => {
   try {
     const body: addReviewTypes = {
@@ -595,7 +654,7 @@ loginRouter.post("/addReview", async (req: Request, resp: Response) => {
 //     resp.status(500).json({ message: "Internal Server Error" });
 //   }
 // });
-loginRouter.get("/allReview", async (req: Request, resp: Response) => {
+loginRouter.get("/allReview", async (_req: Request, resp: Response) => {
   try {
     const Review = await AddReview.find().sort({ createdAt: -1 });
     // console.log("reviewUserId",Review);
