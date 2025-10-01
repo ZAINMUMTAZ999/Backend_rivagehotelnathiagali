@@ -138,6 +138,25 @@ loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
     resp.status(500).json({ message: "Internal Server Error" });
   }
 });
+// getting id per hotel
+loginRouter.get(
+  "/edit/:id",
+  verifyToken,
+  authRoles("admin"),
+  async (req: Request, resp: Response) => {
+    const id = req.params.id.toString();
+    try {
+      const hotel = await AddHotel.findById({
+        _id: id,
+        userId: req.userId,
+      });
+      resp.json(hotel);
+    } catch (error) {
+      console.error("Error in search route:", error);
+      resp.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
 
 loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
   try {
@@ -489,27 +508,26 @@ loginRouter.get(
         resp.status(404).json({ message: "Failed to add the review" });
         return;
       }
-         // Build response
-    type bookingSearchResponse = {
-      data: AddBookingTypes[];
-      pagination: {
-        total: number;
-        page: number;
-        pages: number;
+      // Build response
+      type bookingSearchResponse = {
+        data: AddBookingTypes[];
+        pagination: {
+          total: number;
+          page: number;
+          pages: number;
+        };
       };
-    };
 
-    const response: bookingSearchResponse = {
-      data: booking,
-      pagination: {
-        total,
-        page: pageNumber,
-        pages: Math.ceil(total / pageSize),
-      },
-    };
+      const response: bookingSearchResponse = {
+        data: booking,
+        pagination: {
+          total,
+          page: pageNumber,
+          pages: Math.ceil(total / pageSize),
+        },
+      };
 
-    resp.status(200).json(response);
-
+      resp.status(200).json(response);
     } catch (error) {
       console.error("Error in Bookings route:", error);
       resp.status(500).json({ message: "Internal Server Error" });
