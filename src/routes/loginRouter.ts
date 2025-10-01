@@ -138,6 +138,59 @@ loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
     resp.status(500).json({ message: "Internal Server Error" });
   }
 });
+loginRouter.delete(
+  "/delete/:id",
+  verifyToken,
+  authRoles("admin"),
+  async (req: Request, resp: Response) => {
+    try {
+      const userId = req.userId;
+      if(!userId){
+        "not id" 
+        return;
+      }
+      console.log("User ID from token:", userId);
+
+     const roomId = req.params.id;
+
+      // console.log("startJOb", jobId);
+      // console.log("Attempting to delete job with ID:", jobId);
+
+      // First just check if the job exists at all
+      const jobExists = await AddHotel.findById(roomId);
+      console.log("Job exists check:", jobExists);
+
+      if (!jobExists) {
+        resp.status(404).json({ message: "Job not found" });
+        return;
+      }
+
+      // Then check if it belongs to this user
+      if (jobExists.userId.toString() !== userId) {
+        console.log("Ownership mismatch:", {
+          jobUserId: jobExists.userId.toString(),
+          tokenUserId: userId,
+        });
+        resp
+          .status(403)
+          .json({ message: "You don't have permission to delete this job" });
+      }
+
+      // Now delete the job
+      // console.log("MIdJOb", jobId);
+      const userDelete = await AddHotel.findByIdAndDelete(roomId);
+      // console.log("Job deleted:", userDelete);
+      // console.log("last jobId:", jobId);
+
+      resp
+        .status(200)
+        .json({ message: "Job deleted successfully", job: userDelete });
+    } catch (error) {
+      console.error("Error in delete job route:", error);
+      resp.status(500).json({ message: "Internal Server Error" });
+    }
+  }
+);
 // getting id per hotel
 loginRouter.get(
   "/edit/:id",
@@ -146,7 +199,7 @@ loginRouter.get(
   async (req: Request, resp: Response) => {
     const id = req.params.id.toString();
     try {
-      const hotel = await AddHotel.findById({
+      const hotel = await AddHotel.findOne({
         _id: id,
         userId: req.userId,
       });
