@@ -139,7 +139,7 @@ loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
   }
 });
 loginRouter.delete(
-  "/delete/:id",
+  "/delete/:hotelId",
   verifyToken,
   authRoles("admin"),
   async (req: Request, resp: Response) => {
@@ -151,7 +151,7 @@ loginRouter.delete(
       }
       console.log("User ID from token:", userId);
 
-      const roomId = req.params.id;
+      const roomId = req.params.hotelId;
 
       // console.log("startJOb", jobId);
       // console.log("Attempting to delete job with ID:", jobId);
