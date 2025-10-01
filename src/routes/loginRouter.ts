@@ -97,14 +97,7 @@ loginRouter.post("/login", async (req: Request, resp: Response) => {
   }
 });
 
-// loginRouter.get(
-//   "/validate-token",
-//   verifyToken,
-//   async (req: Request, resp: Response) => {
-//     resp.status(200).send({ userId: req.userId });
-//   }
-// );
-// In your backend loginRouter.ts
+
 loginRouter.get(
   "/validate-token",
   verifyToken,
@@ -152,7 +145,7 @@ loginRouter.delete(
       if (!userId) {
         resp.status(401).json({ message: "Authentication required." });
         return;
-      } // Use findOneAndDelete to check ID and ownership in a single query
+      } 
 
       const deletedHotel = await AddHotel.findOneAndDelete({
         _id: hotelId,
@@ -160,8 +153,7 @@ loginRouter.delete(
       });
 
       if (!deletedHotel) {
-        // If not found, it's either an invalid ID (404) or a permission issue (403).
-        // Since the find query includes userId, a 403 or 404 is appropriate.
+       
         resp
           .status(404)
           .json({ message: "Hotel not found or unauthorized to delete." });
