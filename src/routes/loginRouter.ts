@@ -210,6 +210,39 @@ loginRouter.get(
     }
   }
 );
+// loginRouter.put(
+//   "/edit/:hotelId",
+//   verifyToken,
+//   authRoles("admin"),
+//   upload.array("imageFiles"),
+//   async (req: Request, resp: Response) => {
+//     try {
+//          const updateHotel: addHotelTypes = req.body;
+//     updateHotel.lastUpdated = new Date();
+//     const hotel = await AddHotel.findOneAndUpdate({
+//       _id: req.params.hotelId,
+//       userId: req.userId,
+//     },
+//   updateHotel,{
+//     new:true
+//   });
+//   if(!hotel){
+//     resp.status(400).json({message:"job not found"})
+//     return;
+//   };
+//   const files = req.files as Express.Multer.File[];
+//   const updatedimageURLS = await uploadImages(files);
+//   hotel.imageUrls=[...updatedimageURLS,...(updateHotel.imageUrls || "")];
+
+// await hotel.save();
+// resp.status(201).json(hotel);
+      
+//     } catch (error) {
+      
+//     }
+ 
+//   }
+// );
 loginRouter.put(
   "/edit/:hotelId",
   verifyToken,
@@ -217,33 +250,57 @@ loginRouter.put(
   upload.array("imageFiles"),
   async (req: Request, resp: Response) => {
     try {
-         const updateHotel: addHotelTypes = req.body;
-    updateHotel.lastUpdated = new Date();
-    const hotel = await AddHotel.findOneAndUpdate({
-      _id: req.params.hotelId,
-      userId: req.userId,
-    },
-  updateHotel,{
-    new:true
-  });
-  if(!hotel){
-    resp.status(400).json({message:"job not found"})
-    return;
-  };
-  const files = req.files as Express.Multer.File[];
-  const updatedimageURLS = await uploadImages(files);
-  hotel.imageUrls=[...updatedimageURLS,...(updateHotel.imageUrls || "")];
+      const updateHotelData = req.body; // Using a cleaner variable name
+      const hotelId = req.params.hotelId;
+      const userId = req.userId;
+      
+      // 1. Upload new image files first
+      const files = req.files as Express.Multer.File[];
+      const newImageUrls = await uploadImages(files); // URLs of newly uploaded files
 
-await hotel.save();
-resp.status(201).json(hotel);
+      // 2. Safely get the existing URLs the user chose to KEEP
+      // The frontend sends only the URLs that were NOT deleted.
+      const keptImageUrls = Array.isArray(updateHotelData.imageUrls) 
+        ? updateHotelData.imageUrls 
+        : (updateHotelData.imageUrls ? [updateHotelData.imageUrls] : []);
+      
+      // 3. Create the final, merged image array
+      const finalImageUrls = [...keptImageUrls, ...newImageUrls];
+
+      // 4. Construct the full update object, setting imageUrls explicitly
+      const updateFields = {
+        name: updateHotelData.name,
+        city: updateHotelData.city,
+        description: updateHotelData.description,
+        type: updateHotelData.type,
+        roomStatus: updateHotelData.roomStatus,
+        pricePerNight: updateHotelData.pricePerNight,
+        facilities: updateHotelData.facilities, // Mongoose handles array of strings here
+        imageUrls: finalImageUrls, // <-- CRITICALLY, overwrite the old array
+        lastUpdated: new Date(),
+      };
+      
+      // 5. Find the specific hotel by ID and USER ID, and apply the $set operation
+      const hotel = await AddHotel.findOneAndUpdate(
+        { _id: hotelId, userId: userId },
+        { $set: updateFields }, // Use $set to replace all fields reliably
+        { new: true, runValidators: true } // Return the new document and run validation
+      );
+
+      if (!hotel) {
+         resp.status(404).json({ message: "Hotel not found or unauthorized." })
+         return;
+      }
+
+      // No need for hotel.save() if using findOneAndUpdate with {new: true}
+       resp.status(200).json(hotel); // Respond with 200 OK (updated resource)
       
     } catch (error) {
-      
+      console.error("Hotel Update Error:", error);
+      return resp.status(500).json({ message: "Server error during hotel update." });
     }
- 
   }
 );
-
 loginRouter.post("/contactUs", async (req: Request, resp: Response) => {
   try {
     const body: contactUsTypes = req.body;
