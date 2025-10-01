@@ -145,13 +145,13 @@ loginRouter.delete(
   async (req: Request, resp: Response) => {
     try {
       const userId = req.userId;
-      if(!userId){
-        "not id" 
+      if (!userId) {
+        ("not id");
         return;
       }
       console.log("User ID from token:", userId);
 
-     const roomId = req.params.id;
+      const roomId = req.params.id;
 
       // console.log("startJOb", jobId);
       // console.log("Attempting to delete job with ID:", jobId);
@@ -208,6 +208,39 @@ loginRouter.get(
       console.error("Error in search route:", error);
       resp.status(500).json({ message: "Internal Server Error" });
     }
+  }
+);
+loginRouter.put(
+  "/edit/:hotelId",
+  verifyToken,
+  authRoles("admin"),
+  upload.array("imageFiles"),
+  async (req: Request, resp: Response) => {
+    try {
+         const updateHotel: addHotelTypes = req.body;
+    updateHotel.lastUpdated = new Date();
+    const hotel = await AddHotel.findOneAndUpdate({
+      _id: req.params.hotelId,
+      userId: req.userId,
+    },
+  updateHotel,{
+    new:true
+  });
+  if(!hotel){
+    resp.status(400).json({message:"job not found"})
+    return;
+  };
+  const files = req.files as Express.Multer.File[];
+  const updatedimageURLS = await uploadImages(files);
+  hotel.imageUrls=[...updatedimageURLS,...(updateHotel.imageUrls || "")];
+
+await hotel.save();
+resp.status(201).json(hotel);
+      
+    } catch (error) {
+      
+    }
+ 
   }
 );
 
