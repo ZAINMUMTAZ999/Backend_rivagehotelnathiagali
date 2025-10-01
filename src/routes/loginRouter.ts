@@ -297,7 +297,7 @@ loginRouter.put(
       
     } catch (error) {
       console.error("Hotel Update Error:", error);
-      return resp.status(500).json({ message: "Server error during hotel update." });
+       resp.status(500).json({ message: "Server error during hotel update." });
     }
   }
 );
