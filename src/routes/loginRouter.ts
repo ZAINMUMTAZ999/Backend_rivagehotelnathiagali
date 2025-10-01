@@ -138,55 +138,41 @@ loginRouter.get("/rooms/:id", async (req: Request, resp: Response) => {
     resp.status(500).json({ message: "Internal Server Error" });
   }
 });
+// In loginRouter.delete("/delete/:hotelId", ...)
+
 loginRouter.delete(
   "/delete/:hotelId",
   verifyToken,
   authRoles("admin"),
-  async (req: Request, resp: Response) => {
+  async (req, resp) => {
     try {
       const userId = req.userId;
+      const hotelId = req.params.hotelId;
+
       if (!userId) {
-        ("not id");
+        resp.status(401).json({ message: "Authentication required." });
         return;
-      }
-      console.log("User ID from token:", userId);
+      } // Use findOneAndDelete to check ID and ownership in a single query
 
-      const roomId = req.params.hotelId;
+      const deletedHotel = await AddHotel.findOneAndDelete({
+        _id: hotelId,
+        userId: userId, // ⬅️ Ensures only the owner/admin can delete
+      });
 
-      // console.log("startJOb", jobId);
-      // console.log("Attempting to delete job with ID:", jobId);
-
-      // First just check if the job exists at all
-      const jobExists = await AddHotel.findById(roomId);
-      console.log("Job exists check:", jobExists);
-
-      if (!jobExists) {
-        resp.status(404).json({ message: "Job not found" });
-        return;
-      }
-
-      // Then check if it belongs to this user
-      if (jobExists.userId.toString() !== userId) {
-        console.log("Ownership mismatch:", {
-          jobUserId: jobExists.userId.toString(),
-          tokenUserId: userId,
-        });
+      if (!deletedHotel) {
+        // If not found, it's either an invalid ID (404) or a permission issue (403).
+        // Since the find query includes userId, a 403 or 404 is appropriate.
         resp
-          .status(403)
-          .json({ message: "You don't have permission to delete this job" });
+          .status(404)
+          .json({ message: "Hotel not found or unauthorized to delete." });
+        return;
       }
-
-      // Now delete the job
-      // console.log("MIdJOb", jobId);
-      const userDelete = await AddHotel.findByIdAndDelete(roomId);
-      // console.log("Job deleted:", userDelete);
-      // console.log("last jobId:", jobId);
 
       resp
         .status(200)
-        .json({ message: "Job deleted successfully", job: userDelete });
+        .json({ message: "Hotel deleted successfully", hotel: deletedHotel });
     } catch (error) {
-      console.error("Error in delete job route:", error);
+      console.error("Error in delete hotel route:", error);
       resp.status(500).json({ message: "Internal Server Error" });
     }
   }
@@ -236,11 +222,11 @@ loginRouter.get(
 
 // await hotel.save();
 // resp.status(201).json(hotel);
-      
+
 //     } catch (error) {
-      
+
 //     }
- 
+
 //   }
 // );
 loginRouter.put(
@@ -253,17 +239,19 @@ loginRouter.put(
       const updateHotelData = req.body; // Using a cleaner variable name
       const hotelId = req.params.hotelId;
       const userId = req.userId;
-      
+
       // 1. Upload new image files first
       const files = req.files as Express.Multer.File[];
       const newImageUrls = await uploadImages(files); // URLs of newly uploaded files
 
       // 2. Safely get the existing URLs the user chose to KEEP
       // The frontend sends only the URLs that were NOT deleted.
-      const keptImageUrls = Array.isArray(updateHotelData.imageUrls) 
-        ? updateHotelData.imageUrls 
-        : (updateHotelData.imageUrls ? [updateHotelData.imageUrls] : []);
-      
+      const keptImageUrls = Array.isArray(updateHotelData.imageUrls)
+        ? updateHotelData.imageUrls
+        : updateHotelData.imageUrls
+        ? [updateHotelData.imageUrls]
+        : [];
+
       // 3. Create the final, merged image array
       const finalImageUrls = [...keptImageUrls, ...newImageUrls];
 
@@ -279,7 +267,7 @@ loginRouter.put(
         imageUrls: finalImageUrls, // <-- CRITICALLY, overwrite the old array
         lastUpdated: new Date(),
       };
-      
+
       // 5. Find the specific hotel by ID and USER ID, and apply the $set operation
       const hotel = await AddHotel.findOneAndUpdate(
         { _id: hotelId, userId: userId },
@@ -288,16 +276,15 @@ loginRouter.put(
       );
 
       if (!hotel) {
-         resp.status(404).json({ message: "Hotel not found or unauthorized." })
-         return;
+        resp.status(404).json({ message: "Hotel not found or unauthorized." });
+        return;
       }
 
       // No need for hotel.save() if using findOneAndUpdate with {new: true}
-       resp.status(200).json(hotel); // Respond with 200 OK (updated resource)
-      
+      resp.status(200).json(hotel); // Respond with 200 OK (updated resource)
     } catch (error) {
       console.error("Hotel Update Error:", error);
-       resp.status(500).json({ message: "Server error during hotel update." });
+      resp.status(500).json({ message: "Server error during hotel update." });
     }
   }
 );
