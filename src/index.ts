@@ -20,10 +20,10 @@ mongoose
     console.error("Database connection error:", error);
   });
 
-  // origin: "http://localhost:3000",
 app.use(
   cors({
     origin: "https://rivagehotelnathiagali.vercel.app",
+    // origin: "http://localhost:3000",
 
     credentials: true,
   })
