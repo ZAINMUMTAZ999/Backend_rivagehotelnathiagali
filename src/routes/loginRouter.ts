@@ -17,18 +17,7 @@ import { AddHotel, addHotelTypes } from "../models/addHotel.models";
 import { AddHeroImage } from "../models/addHeroImage";
 import { Review } from "../models/addReviewHoteLId";
 import { AddBooking, AddBookingTypes } from "../models/addBooking.model";
-// import { addReviewHoteLId } from "../models/addReviewHoteLId";
 
-// import { AddHeroImage } from "../models/addHeroImage";
-
-// export type jobSearchResponse = {
-//   data: AddJobTypes[];
-//   pagination: {
-//     total: number;
-//     page: number;
-//     pages: number;
-//   };
-// };
 const JWT_SECRET_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 const storage = multer.memoryStorage();
@@ -77,8 +66,6 @@ loginRouter.post("/login", async (req: Request, resp: Response) => {
         expiresIn: "1d",
       }
     );
-    // console.log("role", user?.role);
-    // console.log(token);
     resp.cookie("auth_token", token, {
       httpOnly: true,
       secure: true, // Must be true when sameSite is 'None'
@@ -111,10 +98,10 @@ loginRouter.get(
   }
 );
 loginRouter.get(
-  "/dataa",
+  "/data",
 
   async (_req: Request, resp: Response) => {
-    resp.status(200).json({ message: "hey dataaa" });
+    resp.status(200).json({ message: "hey data api working " });
   }
 );
 // getting id per hotel
