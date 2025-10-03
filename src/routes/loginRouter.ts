@@ -508,21 +508,21 @@ loginRouter.put(
     try {
       // const { firstName, lastName } = req.body;
       // const Body:AddJobTypes = req.body;
-      const userId = req.userId;
+      // const userId = req.userId;
 
-      if (!userId) {
-        res.status(404).json({ message: "User ID not found" });
-        return;
-      }
+      // if (!userId) {
+      //   res.status(404).json({ message: "User ID not found" });
+      //   return;
+      // }
 
       // const updates: { imageFile?: string } = {};
       // if (imageFile) updates.imageFile = imageFile;
       // if (lastName) updates.imageFile = imageFile;
       const updatedImageUrl = AddHeroImage;
       const updatedUser = await AddHeroImage.findOneAndUpdate(
-        { userId },
-        { $set: { imageFile: updatedImageUrl } },
-        { new: true, upsert: true }
+        {}, 
+      { $set: { imageFile: updatedImageUrl, userId: req.userId } }, 
+      { new: true, upsert: true }
       );
 
       if (!updatedUser) {
