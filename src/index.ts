@@ -22,7 +22,7 @@ mongoose
 
 app.use(
   cors({
-    origin: "httpshttps://demosekaispacehotelapp.vercel.app",
+    origin: "https://demosekaispacehotelapp.vercel.app",
  
 
     credentials: true,
