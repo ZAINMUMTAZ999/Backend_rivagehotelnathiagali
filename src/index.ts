@@ -23,7 +23,7 @@ mongoose
 app.use(
   cors({
     origin: "httpshttps://demosekaispacehotelapp.vercel.app",
-    // origin: "http://localhost:3000",
+ 
 
     credentials: true,
   })
