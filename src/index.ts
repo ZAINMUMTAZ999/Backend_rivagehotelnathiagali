@@ -19,15 +19,34 @@ mongoose
   .catch((error) => {
     console.error("Database connection error:", error);
   });
-
+  // Allowed origins (add as many as you want)
+const allowedOrigins = [
+  "https://demosekaispacehotelapp.vercel.app",
+  "https://arcadianresort.vercel.app",
+  "http://localhost:5173", // for local dev
+];
 app.use(
   cors({
-    origin: "https://demosekaispacehotelapp.vercel.app",
- 
-
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like Postman or mobile apps)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
+// app.use(
+//   cors({
+//     origin: "https://demosekaispacehotelapp.vercel.app",
+ 
+
+//     credentials: true,
+//   })
+// );
 // 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
