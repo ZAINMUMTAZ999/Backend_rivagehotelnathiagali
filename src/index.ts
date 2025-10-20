@@ -2,7 +2,7 @@ import express ,{Response, Router} from "express";
 import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import serverless from "serverless-http";
+// import serverless from "serverless-http";
 import mongoose from "mongoose";
 import { registerRouter } from "./routes/registerRouter";
 import { loginRouter } from "./routes/loginRouter";
@@ -56,13 +56,16 @@ const router = Router();
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 router.use("/v1", registerRouter);
-router.use("/v2", loginRouter);
+app.use("/v2", loginRouter);
 router.use("/v3", addHeroImageRouter);
 
 
 app.get("/", (_req, res:Response) => {
   res.send("✅ Backend running successfully !");
 });
-const handler = serverless(app);
-console.log("handler",handler);
-export { handler };
+// const handler = serverless(app);
+// console.log("handler",handler);
+// export { handler };
+app.listen(8000,()=>{
+  console.log("app is 8000")
+})
