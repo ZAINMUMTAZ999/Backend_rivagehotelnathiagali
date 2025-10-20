@@ -63,6 +63,7 @@ router.use("/v3", addHeroImageRouter);
 app.get("/", (_req, res:Response) => {
   res.send("✅ Backend running successfully !");
 });
+app.use("/api/",router)
 const handler = serverless(app);
 console.log("handler",handler);
 export { handler };
