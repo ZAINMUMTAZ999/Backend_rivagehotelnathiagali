@@ -4,10 +4,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import serverless from "serverless-http";
 import mongoose from "mongoose";
-import { registerRouter } from "./routes/registerRouter";
-import { loginRouter } from "./routes/loginRouter";
+import { registerRouter } from "../../src/routes/registerRouter";
+import { loginRouter } from "../../src/routes/loginRouter";
 import { v2 as cloudinary } from "cloudinary";
-import { addHeroImageRouter } from "./routes/addHeroImageRouter";
+import { addHeroImageRouter } from "../../src/routes/addHeroImageRouter";
 
 const MONGODB_URL = process.env.MONGODB_URL as string;
 
